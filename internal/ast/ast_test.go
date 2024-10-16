@@ -144,6 +144,66 @@ func TestEvaluateRuleGTEOperations(t *testing.T) {
 	judge(t, testCases, ast)
 }
 
+// Less than Equal
+func TestEvaluateRuleLTEOperations(t *testing.T) {
+	ast := `{
+		"type": "condition",
+		"field": "income",
+		"op": "<=",
+		"value": "100000"
+	}`
+
+	testCases := []TestCase{
+		{
+			expectedResult: true,
+			data: JSON{
+				"income": "30000",
+			},
+		},
+		{
+			expectedResult: true,
+			data: JSON{
+				"income": "100000",
+			},
+		},
+		{
+			expectedResult: false,
+			data: JSON{
+				"income": "128000",
+			},
+		},
+	}
+
+	judge(t, testCases, ast)
+}
+
+// Not equal
+func TestEvaluateRuleNotEqOperations(t *testing.T) {
+	ast := `{
+		"type": "condition",
+		"field": "age",
+		"op": "!=",
+		"value": "10"
+	}`
+
+	testCases := []TestCase{
+		{
+			expectedResult: true,
+			data: JSON{
+				"age": "11",
+			},
+		},
+		{
+			expectedResult: false,
+			data: JSON{
+				"age": "10",
+			},
+		},
+	}
+
+	judge(t, testCases, ast)
+}
+
 func judge(t *testing.T, testCases []TestCase, astJSON string) {
 	for _, testCase := range testCases {
 		result, err := EvaluateRule(astJSON, testCase.data)
