@@ -27,7 +27,7 @@ var astJSON = `{
 		}
 	}`
 
-func TestEvaluateRuleWithANDOperator(t *testing.T) {
+func TestEvaluateRule_WithANDOperator(t *testing.T) {
 	testCases := []TestCase{
 		{
 			expectedResult: true,
@@ -68,7 +68,7 @@ func TestEvaluateRuleWithANDOperator(t *testing.T) {
 	judge(t, testCases, astJSON)
 }
 
-func TestEvaluateRuleWithOROperator(t *testing.T) {
+func TestEvaluateRule_WithOROperator(t *testing.T) {
 	ast := strings.ReplaceAll(astJSON, "AND", "OR")
 
 	testCases := []TestCase{
@@ -112,7 +112,7 @@ func TestEvaluateRuleWithOROperator(t *testing.T) {
 }
 
 // Greater then Equal
-func TestEvaluateRuleGTEOperations(t *testing.T) {
+func TestEvaluateRule_GTEOperations(t *testing.T) {
 	ast := `{
 		"type": "condition",
 		"field": "income",
@@ -145,7 +145,7 @@ func TestEvaluateRuleGTEOperations(t *testing.T) {
 }
 
 // Less than Equal
-func TestEvaluateRuleLTEOperations(t *testing.T) {
+func TestEvaluateRule_LTEOperations(t *testing.T) {
 	ast := `{
 		"type": "condition",
 		"field": "income",
@@ -178,7 +178,7 @@ func TestEvaluateRuleLTEOperations(t *testing.T) {
 }
 
 // Not equal
-func TestEvaluateRuleNotEqOperations(t *testing.T) {
+func TestEvaluateRule_NotEqOperations(t *testing.T) {
 	ast := `{
 		"type": "condition",
 		"field": "age",

@@ -26,24 +26,24 @@ func EvaluateRule(astJSON string, data JSON) (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("failed to parse AST JSON: %v", err)
 	}
-	return evaluateNode(&root, data), nil
+	return root.EvaluateNode(data), nil
 }
 
-func evaluateNode(node *Node, data JSON) bool {
+func (node *Node) EvaluateNode(data JSON) bool {
 	switch node.Type {
 	case "operator":
-		return evaluateOperator(node, data)
+		return node.evaluateOperator(data)
 	case "condition":
-		return evaluateCondition(node, data)
+		return node.evaluateCondition(data)
 	default:
 		fmt.Printf("Unknown node type: %s\n", node.Type)
 		return false
 	}
 }
 
-func evaluateOperator(node *Node, data JSON) bool {
-	leftResult := evaluateNode(node.Left, data)
-	rightResult := evaluateNode(node.Right, data)
+func (node *Node) evaluateOperator(data JSON) bool {
+	leftResult := node.Left.EvaluateNode(data)
+	rightResult := node.Right.EvaluateNode(data)
 
 	switch node.Value {
 	case "AND":
@@ -56,7 +56,7 @@ func evaluateOperator(node *Node, data JSON) bool {
 	}
 }
 
-func evaluateCondition(node *Node, data JSON) bool {
+func (node *Node) evaluateCondition(data JSON) bool {
 	fieldValue, ok := data[node.Field]
 	if !ok {
 		fmt.Printf("Field not found in data: %s\n", node.Field)
