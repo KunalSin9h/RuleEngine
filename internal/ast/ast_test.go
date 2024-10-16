@@ -209,13 +209,11 @@ func judge(t *testing.T, testCases []TestCase, astJSON string) {
 		result, err := EvaluateRule(astJSON, testCase.data)
 
 		if err != nil {
-			t.Log(err.Error())
-			t.Fail()
+			t.Error(err)
 		}
 
 		if result != testCase.expectedResult {
-			t.Logf("Expected %v, received %v, for data %v", testCase.expectedResult, result, testCase.data)
-			t.Fail()
+			t.Errorf("Expected %v, received %v, for data %v", testCase.expectedResult, result, testCase.data)
 		}
 	}
 }

@@ -13,7 +13,7 @@ func TestParser_Parse_Example1(t *testing.T) {
 	_, err := parser.Parse(ruleString)
 
 	if err != nil {
-		t.Log(err.Error())
+		t.Error(err.Error())
 		t.Fail()
 	}
 }
@@ -25,7 +25,7 @@ func TestParser_Parse_Example2(t *testing.T) {
 	_, err := parser.Parse(ruleString)
 
 	if err != nil {
-		t.Log(err.Error())
+		t.Error(err.Error())
 		t.Fail()
 	}
 }
@@ -37,7 +37,7 @@ func TestParser_Parse_InvalidRule_MissingClosingParenthesis(t *testing.T) {
 	_, err := parser.Parse(ruleString)
 
 	if err == nil {
-		t.Log("Parser works on invalid rule string")
+		t.Error("Parser works on invalid rule string")
 		t.Fail()
 	}
 }
@@ -51,20 +51,18 @@ func TestParser_Parse_InvalidRule_MissingOperator(t *testing.T) {
 	_, err := parser.Parse(ruleString)
 
 	if err == nil {
-		t.Log("Parser works on invalid rule string")
-		t.Fail()
+		t.Error("Parser works on invalid rule string")
 	}
 }
 
 func TestParser_Parse_InvalidRule_BadComparison(t *testing.T) {
-	ruleString := `((age > 30 department = 'Marketing')) AND (salary >d
+	ruleString := `((age > 30 department = 'Marketing')) AND (salary >
 		20000 OR experience > abcd)` // * here
 
 	_, err := parser.Parse(ruleString)
 
 	// Should fail
 	if err == nil {
-		t.Log("Parser works on invalid rule string")
-		t.Fail()
+		t.Error("Parser works on invalid rule string")
 	}
 }
