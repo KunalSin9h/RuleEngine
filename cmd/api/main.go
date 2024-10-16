@@ -33,6 +33,6 @@ func main() {
 	slog.Info("Starting server", "location", server.Addr)
 
 	if err := server.ListenAndServe(); err != nil {
-		slog.Error("Failed to start server", err)
+		slog.Error("Failed to start server", "error message", err.Error())
 	}
 }
