@@ -30,3 +30,6 @@ Source:
 
 They are jointly tested in `tests/parse_ast_test.go`.
 
+### Application (API + Postgres + UI)
+
+![Application Architecture demonstration image](https://i.imgur.com/nh1lKvx.png)
