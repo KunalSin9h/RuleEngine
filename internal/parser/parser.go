@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// Parser is a type for maintaining Parsing State
 type Parser struct {
 	tokens []string
 	pos    int

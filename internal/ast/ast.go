@@ -29,6 +29,7 @@ func EvaluateRule(astJSON string, data JSON) (bool, error) {
 	return root.EvaluateNode(data), nil
 }
 
+// EvaluateNode evaluates the rules against AST Node
 func (node *Node) EvaluateNode(data JSON) bool {
 	switch node.Type {
 	case "operator":
