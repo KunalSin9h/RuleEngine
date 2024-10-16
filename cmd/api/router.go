@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-func setupRouter() *http.ServeMux {
+func (c *Config) setupRouter() {
 	router := http.NewServeMux()
 
 	// Show Frontend UI on `GET /`
@@ -12,5 +12,5 @@ func setupRouter() *http.ServeMux {
 
 	// Other Endpoints
 
-	return router
+	c.router = router
 }

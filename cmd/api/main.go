@@ -14,15 +14,16 @@ const (
 )
 
 type Config struct {
-	router *http.ServeMux
 	db     *sql.DB
+	router *http.ServeMux
 }
 
 func main() {
 	app := Config{
-		router: setupRouter(),
-		db:     setupPostgres(POSTGRES),
+		db: setupPostgres(POSTGRES),
 	}
+
+	app.setupRouter()
 
 	server := http.Server{
 		Addr:    fmt.Sprintf("%s:%s", HOST, PORT),
