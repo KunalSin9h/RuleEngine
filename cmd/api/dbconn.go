@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/jackc/pgx/v5"
 	"log/slog"
+	"os"
 	"time"
 )
 
@@ -23,6 +24,21 @@ func setupPostgres(ctx context.Context, connString string) (*pgx.Conn, error) {
 		}
 
 		slog.Info("Successfully connected to Postgres DB")
+
+		schema, err := os.ReadFile("./schema/schema.sql")
+		if err != nil {
+			slog.Error("Failed to read schema file")
+			return nil, err
+		}
+
+		sqlSchema := string(schema)
+		_, err = conn.Exec(ctx, sqlSchema)
+
+		if err != nil {
+			slog.Error("Failed to execute schema statement")
+			return nil, err
+		}
+
 		return conn, err
 	}
 
