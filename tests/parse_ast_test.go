@@ -11,13 +11,11 @@ type TestCase struct {
 	data           ast.JSON
 }
 
-var p parser.Parser
-
 func TestParseAST(t *testing.T) {
 	ruleString := `((age > 30 AND department = 'Sales') OR (age < 25 AND
 		department = 'Marketing')) AND (salary > 50000 OR experience > 5)`
 
-	astNode, err := p.Parse(ruleString)
+	astNode, err := parser.CreateRule(ruleString)
 
 	// This should parse correctly
 	if err != nil {

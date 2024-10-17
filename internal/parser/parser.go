@@ -13,6 +13,13 @@ type Parser struct {
 	pos    int
 }
 
+// CreateRule  creates AST Node with ruleString
+func CreateRule(ruleString string) (*ast.Node, error) {
+	p := Parser{}
+	return p.Parse(ruleString)
+}
+
+// Parse creates AST Node with rule string
 func (p *Parser) Parse(ruleString string) (*ast.Node, error) {
 	ruleString = strings.ReplaceAll(ruleString, "(", " ( ")
 	ruleString = strings.ReplaceAll(ruleString, ")", " ) ")

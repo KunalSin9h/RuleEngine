@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// setupPostgres connect to postgres db and execute schema file.
 func setupPostgres(ctx context.Context, connString string) (*pgx.Conn, error) {
 	slog.Info("Connecting to Postgres DB...", "connection string", connString)
 
