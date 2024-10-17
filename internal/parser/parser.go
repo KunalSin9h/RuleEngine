@@ -19,6 +19,45 @@ func CreateRule(ruleString string) (*ast.Node, error) {
 	return p.Parse(ruleString)
 }
 
+func CombineRules(ruleStrings []string) (*ast.Node, error) {
+	trees := make([]*ast.Node, len(ruleStrings))
+
+	for i, rs := range ruleStrings {
+		tree, err := CreateRule(rs)
+		if err != nil {
+			return nil, err
+		}
+
+		trees[i] = tree
+	}
+
+	combineRoot := &ast.Node{
+		Type:  "operator",
+		Value: "AND",
+	}
+
+	current := combineRoot
+
+	for _, tree := range trees {
+		if current.Left == nil {
+			current.Left = tree
+		} else if current.Right == nil {
+			current.Right = tree
+		} else {
+			newNode := &ast.Node{
+				Left:  current.Right,
+				Type:  "operator",
+				Value: "AND",
+			}
+
+			current.Right = newNode
+			current = newNode
+		}
+	}
+
+	return combineRoot, nil
+}
+
 // Parse creates AST Node with rule string
 func (p *Parser) Parse(ruleString string) (*ast.Node, error) {
 	ruleString = strings.ReplaceAll(ruleString, "(", " ( ")

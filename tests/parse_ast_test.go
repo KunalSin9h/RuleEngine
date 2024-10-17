@@ -20,7 +20,6 @@ func TestParseAST(t *testing.T) {
 	// This should parse correctly
 	if err != nil {
 		t.Error(err)
-		t.Fail()
 	}
 
 	testCases := []TestCase{
@@ -80,6 +79,72 @@ func TestParseAST(t *testing.T) {
 		if result != testCase.expectedResult {
 			t.Logf("Expected: %v, got %v for data %v", testCase.expectedResult, result, testCase.data)
 			t.Error("Failed to evaluate AST Against data")
+		}
+	}
+}
+
+func TestParser_CombineRules(t *testing.T) {
+	rules := []string{
+		"(age >= 18 AND department = 'Marketing')",
+		"(age >= 18 AND income >= 30000)",
+	}
+
+	node, err := parser.CombineRules(rules)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	testCases := []TestCase{
+		{
+			expectedResult: true,
+			data: ast.JSON{
+				"age":        "20",
+				"department": "Marketing",
+				"income":     "30000",
+			},
+		},
+		{
+			expectedResult: true,
+			data: ast.JSON{
+				"age":        "30",
+				"department": "Marketing",
+				"income":     "90000",
+			},
+		},
+		{
+			expectedResult: false,
+			data: ast.JSON{
+				"age": "17",
+			},
+		},
+		{
+			expectedResult: false,
+			data: ast.JSON{
+				"age":        "27",
+				"department": "Sales",
+				"income":     "90000",
+			},
+		},
+		{
+			expectedResult: false,
+			data: ast.JSON{
+				"age":        "27",
+				"department": "Marketing",
+				"income":     "10000",
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		if node == nil {
+			t.Error("Invalid AST Node")
+			return
+		}
+
+		result := node.EvaluateNode(testCase.data)
+
+		if result != testCase.expectedResult {
+			t.Errorf("Expected result: %v, got %v for data: %v", testCase.expectedResult, result, testCase.data)
 		}
 	}
 }
