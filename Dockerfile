@@ -16,6 +16,7 @@ FROM alpine:latest
 
 WORKDIR /ruleengine
 COPY ui ./ui
+COPY schema ./schema
 COPY --from=bin_build /ruleengine/bin .
 
 ENTRYPOINT ["/ruleengine/bin"]
