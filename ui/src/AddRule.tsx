@@ -7,8 +7,8 @@ export default function AddRule() {
   const [error, setError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState("");
-  const [showModal, setShowModal] = useState(true);
-  const [data, setData] = useState('{"age": 30}');
+  const [showModal, setShowModal] = useState(false);
+  const [data, setData] = useState();
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRule(event.target.value);
@@ -22,41 +22,6 @@ export default function AddRule() {
     setDescription(event.target.value);
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (rule.trim() === '' || name.trim() === '') {
-      setError(true);
-      return;
-    }
-    setIsLoading(true);
-   
-    const response = await fetch('/rule', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ rule, name, description }),
-    });
-
-    if (response.status !== 200) {
-      setApiError(`Failed, got ${response.status}`);
-      setIsLoading(false);
-      return;
-    }
-
-    const data = await response.json();
-    setData(data);
-    
-    setRule('');
-    setName('');
-    setDescription('');
-
-    setError(false);
-    setIsLoading(false);
-    setApiError("");
-    setShowModal(true);
-  };
-
   return (
     <div className="flex flex-col gap-4 w-full">
       <label htmlFor="rule" className="text-white font-bold">Rule:</label>
@@ -65,7 +30,7 @@ export default function AddRule() {
         value={rule}
         // @ts-expect-error
         onChange={handleInputChange}
-        className="bg-gray-700 text-white px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none w-full"
+        className="bg-gray-700 text-white px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none w-full font-mono text-sm"
         style={{ width: '100%', height: "200px" }}
       />
       {error && <p className="text-red-500">Rule and Name are required fields</p>}
@@ -91,8 +56,44 @@ export default function AddRule() {
         </div>
       </div>
       <button
-        // @ts-expect-error
-        onClick={handleSubmit}
+        onClick={async (e) => {
+          e.preventDefault();
+          if (rule.trim() === '' || name.trim() === '') {
+            setError(true);
+            return;
+          }
+          setIsLoading(true);
+         
+          const response = await fetch('/rule', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ rule, name, description }),
+          });
+      
+          if (response.status !== 200) {
+            setApiError(`Failed, got ${response.status}`);
+            setIsLoading(false);
+            return;
+          }
+          if (response.ok) {
+            const data = await response.json();
+            setData(data)
+          } else {
+            setApiError(`Failed, got ${response.status}`);
+          }
+          
+          setRule('');
+          setName('');
+          setDescription('');
+      
+          setError(false);
+          setIsLoading(false);
+          setApiError("");
+          setShowModal(true);
+        }}
+        type="button"
         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center"
         disabled={isLoading}
       >
@@ -105,8 +106,10 @@ export default function AddRule() {
                 <h2 className="text-xl font-bold mb-1">Rule Added Successfully</h2>
                 <p className="">The rule has been added successfully.</p>
             </div>
-            {data && < pre className="bg-black text-white p-4 rounded-md" >{data}</pre>}
+            <div className="flex flex-col gap-2">
+            {data && <pre className="bg-black text-white p-4 rounded-md" >{JSON.stringify(data, null, 2)}</pre>}
             <button onClick={() => setShowModal(false)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">Close</button>
+            </div>
           </div>
         </div>
       )}

@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/kunalsin9h/ruleengine/internal/db"
 	"github.com/kunalsin9h/ruleengine/internal/parser"
 	"io"
+	"log/slog"
 	"net/http"
 )
 
@@ -38,12 +42,12 @@ type CreateRulePayload struct {
 	Description string `json:"description"`
 }
 
+// createRule is an endpoint handler for creating new rule with rule string
 func (c *Config) createRule(w http.ResponseWriter, r *http.Request) {
-
+	// ready rule string in the request body
 	data, err := io.ReadAll(r.Body)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, err)
+		sendError(&w, err)
 		return
 	}
 	defer r.Body.Close()
@@ -52,34 +56,48 @@ func (c *Config) createRule(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(data, &payload)
 
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, err)
+		sendError(&w, err)
 		return
 	}
 
 	rule := payload.Rule
-	/*	name := payload.Name
-		description := payload.Description*/
+	name := payload.Name
+	description := payload.Description
 
+	// parse the AST with the given rule string
 	ast, err := parser.CreateRule(rule)
 
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprint(w, err)
+		sendError(&w, err, http.StatusInternalServerError)
 		return
 	}
 
-	responseData, err := json.MarshalIndent(ast, "", "\t")
+	// convert the AST into JSON format
+	astJson, err := json.MarshalIndent(ast, "", "\t")
 
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprint(w, err)
+		sendError(&w, err, http.StatusInternalServerError)
 		return
 	}
 
+	// Add the content in the database
+	query := db.New(c.db)
+	err = query.CreateRule(context.Background(), db.CreateRuleParams{
+		Name:        name,
+		Description: pgtype.Text{String: description, Valid: true},
+		Rule:        rule,
+		Ast:         astJson,
+	})
+
+	if err != nil {
+		sendError(&w, err, http.StatusInternalServerError)
+		return
+	}
+
+	// Send the AST JSON Representation
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprint(w, string(responseData))
+	fmt.Fprint(w, string(astJson))
 }
 
 func enableCORS(next http.HandlerFunc) http.HandlerFunc {
@@ -97,4 +115,16 @@ func enableCORS(next http.HandlerFunc) http.HandlerFunc {
 		// Call the next handler
 		next.ServeHTTP(w, r)
 	}
+}
+
+func sendError(w *http.ResponseWriter, err error, code ...int) {
+	slog.Error(err.Error())
+	(*w).WriteHeader(http.StatusBadRequest)
+
+	if len(code) > 0 {
+		(*w).WriteHeader(code[0])
+	}
+
+	(*w).Header().Set("Content-Type", "text/plain")
+	fmt.Fprintln(*w, err.Error())
 }

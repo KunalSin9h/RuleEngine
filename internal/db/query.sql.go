@@ -7,7 +7,34 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const createRule = `-- name: CreateRule :exec
+INSERT INTO rules (
+    name, description, rule, ast
+) VALUES (
+    $1, $2, $3, $4
+)
+`
+
+type CreateRuleParams struct {
+	Name        string
+	Description pgtype.Text
+	Rule        string
+	Ast         []byte
+}
+
+func (q *Queries) CreateRule(ctx context.Context, arg CreateRuleParams) error {
+	_, err := q.db.Exec(ctx, createRule,
+		arg.Name,
+		arg.Description,
+		arg.Rule,
+		arg.Ast,
+	)
+	return err
+}
 
 const getRule = `-- name: GetRule :one
 SELECT id, name, description, rule, ast, created_at, updated_at FROM rules
