@@ -1,6 +1,8 @@
 package tests
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/kunalsin9h/ruleengine/internal/ast"
 	"github.com/kunalsin9h/ruleengine/internal/parser"
 	"testing"
@@ -83,7 +85,7 @@ func TestParseAST(t *testing.T) {
 	}
 }
 
-func TestParser_CombineRules(t *testing.T) {
+func TestParser_CombineRules_AND(t *testing.T) {
 	rules := []string{
 		"(age >= 18 AND department = 'Marketing')",
 		"(age >= 18 AND income >= 30000)",
@@ -130,6 +132,70 @@ func TestParser_CombineRules(t *testing.T) {
 			data: ast.JSON{
 				"age":        "27",
 				"department": "Marketing",
+				"income":     "10000",
+			},
+		},
+	}
+
+	for _, testCase := range testCases {
+		if node == nil {
+			t.Error("Invalid AST Node")
+			return
+		}
+
+		result := node.EvaluateNode(testCase.data)
+
+		if result != testCase.expectedResult {
+			t.Errorf("Expected result: %v, got %v for data: %v", testCase.expectedResult, result, testCase.data)
+		}
+	}
+}
+
+func TestParser_CombineRules_OR(t *testing.T) {
+	rules := []string{
+		"(age >= 18 OR department = 'Marketing')",
+		"(age >= 18 OR income >= 30000)",
+	}
+
+	node, err := parser.CombineRules(rules)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	d, _ := json.MarshalIndent(node, "", "  ")
+	fmt.Println(string(d))
+	//t.Fail()
+
+	testCases := []TestCase{
+		{
+			expectedResult: true,
+			data: ast.JSON{
+				"age":        "40",
+				"income":     "31000",
+				"department": "R&D",
+			},
+		},
+		{
+			expectedResult: true,
+			data: ast.JSON{
+				"age":        "30",
+				"income":     "10000",
+				"department": "Marketing",
+			},
+		},
+		{
+			expectedResult: false,
+			data: ast.JSON{
+				"age":        "17",
+				"income":     "10000",
+				"department": "Marketing",
+			},
+		},
+		{
+			expectedResult: true,
+			data: ast.JSON{
+				"age":        "27",
+				"department": "Sales",
 				"income":     "10000",
 			},
 		},
