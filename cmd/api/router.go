@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/kunalsin9h/ruleengine/internal/ast"
 	"github.com/kunalsin9h/ruleengine/internal/db"
 	"github.com/kunalsin9h/ruleengine/internal/parser"
 	"io"
@@ -26,7 +27,7 @@ func (c *Config) setupRouter() {
 	router.HandleFunc("POST /rules", func(w http.ResponseWriter, r *http.Request) {})
 
 	// EVALUATE RULE
-	router.HandleFunc("GET /rule/eval", func(w http.ResponseWriter, r *http.Request) {})
+	router.HandleFunc("POST /rule/eval", enableCORS(c.evalRule))
 
 	// OTHER HELPER ENDPOINTS
 
@@ -119,6 +120,63 @@ func (c *Config) getAllRules(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprintln(w, string(data))
+}
+
+type EvalRulePayload struct {
+	RuleID int32  `json:"rule_id"`
+	User   string `json:"user"`
+}
+
+func (c *Config) evalRule(w http.ResponseWriter, r *http.Request) {
+	// ready rule id and user json in the request body
+	data, err := io.ReadAll(r.Body)
+	if err != nil {
+		sendError(&w, err)
+		return
+	}
+	defer r.Body.Close()
+
+	var payload EvalRulePayload
+	err = json.Unmarshal(data, &payload)
+
+	if err != nil {
+		sendError(&w, err, http.StatusInternalServerError)
+		return
+	}
+
+	// fetch AST Node with ID = payload.RuleID
+	query := db.New(c.db)
+	rule, err := query.GetRule(context.Background(), payload.RuleID)
+
+	var astNode ast.Node
+	err = json.Unmarshal(rule.Ast, &astNode)
+
+	if err != nil {
+		sendError(&w, err, http.StatusInternalServerError)
+		return
+	}
+
+	var userDataJson map[string]any
+	err = json.Unmarshal([]byte(payload.User), &userDataJson)
+	if err != nil {
+		sendError(&w, err, http.StatusInternalServerError)
+		return
+	}
+
+	result := astNode.EvaluateNode(userDataJson)
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+
+	responseData, err := json.Marshal(map[string]any{
+		"result": result,
+	})
+	if err != nil {
+		sendError(&w, err, http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintln(w, string(responseData))
 }
 
 func enableCORS(next http.HandlerFunc) http.HandlerFunc {
