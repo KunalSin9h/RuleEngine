@@ -5,13 +5,28 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"os"
 )
 
-const (
+var (
 	PORT     = "5000"
 	HOST     = "0.0.0.0"
-	POSTGRES = "postgresql://admin:admin@localhost:5432/rules"
+	POSTGRES = "postgresql://admin:admin@localhost:5432/rules?sslmode=disable"
 )
+
+func init() {
+	if os.Getenv("PORT") != "" {
+		PORT = os.Getenv("PORT")
+	}
+
+	if os.Getenv("HOST") != "" {
+		HOST = os.Getenv("HOST")
+	}
+
+	if os.Getenv("POSTGRES") != "" {
+		POSTGRES = os.Getenv("POSTGRES")
+	}
+}
 
 type Config struct {
 	db     *sql.DB
@@ -19,8 +34,13 @@ type Config struct {
 }
 
 func main() {
-	app := Config{
-		db: setupPostgres(POSTGRES),
+	app := Config{}
+
+	var err error
+	app.db, err = setupPostgres(POSTGRES)
+
+	if err != nil {
+		os.Exit(1)
 	}
 
 	app.setupRouter()

@@ -3,21 +3,22 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/lib/pq"
 	"log/slog"
-	"os"
 	"time"
+
+	_ "github.com/lib/pq"
 )
 
-func setupPostgres(connString string) *sql.DB {
+func setupPostgres(connString string) (*sql.DB, error) {
 	db, err := sql.Open("postgres", connString)
 
 	if err != nil {
 		slog.Error("Failed to connect to Postgres DB", "error message", err.Error())
-		os.Exit(1)
+		return nil, err
 	}
+	defer db.Close()
 
-	slog.Info("Connected to Postgres DB...", "connection string", connString)
+	slog.Info("Connecting to Postgres DB...", "connection string", connString)
 
 	backOff, retryCounter := 1, 1
 
@@ -26,7 +27,8 @@ func setupPostgres(connString string) *sql.DB {
 			slog.Info(fmt.Sprintf("Failed to connect, retrying... [%d/5]", retryCounter))
 
 			if retryCounter >= 5 {
-				break
+				slog.Error("Exiting...")
+				return nil, fmt.Errorf("error failed connection")
 			}
 
 			retryCounter++
@@ -38,5 +40,6 @@ func setupPostgres(connString string) *sql.DB {
 			break
 		}
 	}
-	return db
+
+	return db, nil
 }
