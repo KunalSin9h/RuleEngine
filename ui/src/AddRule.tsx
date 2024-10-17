@@ -23,7 +23,7 @@ export default function AddRule() {
   }
 
   return (
-    <div className="flex flex-col gap-4 w-full">
+    <div className="flex flex-col gap-4 w-2/4 h-96">
       <label htmlFor="rule" className="text-white font-bold">Rule:</label>
       <textarea
         id="rule"

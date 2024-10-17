@@ -43,7 +43,7 @@ function App() {
       </button>
 
       </div>
-      <div className="card p-4 w-2/4 h-96 flex items-center justify-center">
+      <div className="card p-4 w-full h-full flex items-center justify-center">
         {showAddRule && <AddRule />}
         {showCombineRule && <CombineRule />}
         {showTestRule && <TestRule />}
