@@ -12,7 +12,7 @@ import (
 var (
 	PORT     = "5000"
 	HOST     = "0.0.0.0"
-	POSTGRES = "postgresql://admin:admin@localhost:5432/rules?sslmode=disable"
+	POSTGRES = "postgresql://admin:admin@localhost:5432/ruleengine?sslmode=disable"
 )
 
 func init() {
