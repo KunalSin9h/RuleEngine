@@ -31,7 +31,7 @@ func (c *Config) setupRouter() {
 	// OTHER HELPER ENDPOINTS
 
 	// GET ALL RULES
-	router.HandleFunc("GET /rules", func(w http.ResponseWriter, r *http.Request) {})
+	router.HandleFunc("GET /rules", enableCORS(c.getAllRules))
 
 	c.router = router
 }
@@ -98,6 +98,27 @@ func (c *Config) createRule(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprint(w, string(astJson))
+}
+
+func (c *Config) getAllRules(w http.ResponseWriter, r *http.Request) {
+	query := db.New(c.db)
+
+	rules, err := query.GetRules(context.Background())
+	if err != nil {
+		sendError(&w, err, http.StatusInternalServerError)
+		return
+	}
+
+	data, err := json.MarshalIndent(rules, "", "\t")
+
+	if err != nil {
+		sendError(&w, err, http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintln(w, string(data))
 }
 
 func enableCORS(next http.HandlerFunc) http.HandlerFunc {
