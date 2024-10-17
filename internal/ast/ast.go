@@ -30,49 +30,49 @@ func EvaluateRule(astJSON string, data JSON) (bool, error) {
 }
 
 // EvaluateNode evaluates the rules against AST Node
-func (node *Node) EvaluateNode(data JSON) bool {
-	switch node.Type {
+func (n *Node) EvaluateNode(data JSON) bool {
+	switch n.Type {
 	case "operator":
-		return node.evaluateOperator(data)
+		return n.evaluateOperator(data)
 	case "condition":
-		return node.evaluateCondition(data)
+		return n.evaluateCondition(data)
 	default:
-		fmt.Printf("Unknown node type: %s\n", node.Type)
+		fmt.Printf("Unknown node type: %s\n", n.Type)
 		return false
 	}
 }
 
-func (node *Node) evaluateOperator(data JSON) bool {
-	leftResult := node.Left.EvaluateNode(data)
-	rightResult := node.Right.EvaluateNode(data)
+func (n *Node) evaluateOperator(data JSON) bool {
+	leftResult := n.Left.EvaluateNode(data)
+	rightResult := n.Right.EvaluateNode(data)
 
-	switch node.Value {
+	switch n.Value {
 	case "AND":
 		return leftResult && rightResult
 	case "OR":
 		return leftResult || rightResult
 	default:
-		fmt.Printf("Unknown operator: %s\n", node.Value)
+		fmt.Printf("Unknown operator: %s\n", n.Value)
 		return false
 	}
 }
 
-func (node *Node) evaluateCondition(data JSON) bool {
-	fieldValue, ok := data[node.Field]
+func (n *Node) evaluateCondition(data JSON) bool {
+	fieldValue, ok := data[n.Field]
 	if !ok {
-		fmt.Printf("Field not found in data: %s\n", node.Field)
+		fmt.Printf("Field not found in data: %s\n", n.Field)
 		return false
 	}
 
-	switch node.Op {
+	switch n.Op {
 	case "=":
-		return fmt.Sprintf("%v", fieldValue) == node.Value
+		return fmt.Sprintf("%v", fieldValue) == n.Value
 	case "!=":
-		return fmt.Sprintf("%v", fieldValue) != node.Value
+		return fmt.Sprintf("%v", fieldValue) != n.Value
 	case ">", "<", ">=", "<=":
-		return compareNumbers(fieldValue, node.Value, node.Op)
+		return compareNumbers(fieldValue, n.Value, n.Op)
 	default:
-		fmt.Printf("Unknown comparison operator: %s\n", node.Op)
+		fmt.Printf("Unknown comparison operator: %s\n", n.Op)
 		return false
 	}
 }
