@@ -1,8 +1,9 @@
 package main
 
 import (
-	"database/sql"
+	"context"
 	"fmt"
+	"github.com/jackc/pgx/v5"
 	"log/slog"
 	"net/http"
 	"os"
@@ -29,15 +30,17 @@ func init() {
 }
 
 type Config struct {
-	db     *sql.DB
+	db     *pgx.Conn
 	router *http.ServeMux
 }
 
 func main() {
+	ctx := context.Background()
 	app := Config{}
 
 	var err error
-	app.db, err = setupPostgres(POSTGRES)
+	app.db, err = setupPostgres(ctx, POSTGRES)
+	defer app.db.Close(ctx)
 
 	if err != nil {
 		os.Exit(1)

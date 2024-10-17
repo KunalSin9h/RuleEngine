@@ -1,45 +1,31 @@
 package main
 
 import (
-	"database/sql"
+	"context"
 	"fmt"
+	"github.com/jackc/pgx/v5"
 	"log/slog"
 	"time"
-
-	_ "github.com/lib/pq"
 )
 
-func setupPostgres(connString string) (*sql.DB, error) {
-	db, err := sql.Open("postgres", connString)
-
-	if err != nil {
-		slog.Error("Failed to connect to Postgres DB", "error message", err.Error())
-		return nil, err
-	}
-	defer db.Close()
-
+func setupPostgres(ctx context.Context, connString string) (*pgx.Conn, error) {
 	slog.Info("Connecting to Postgres DB...", "connection string", connString)
 
-	backOff, retryCounter := 1, 1
+	for i := 1; i <= 5; i++ {
+		conn, err := pgx.Connect(ctx, connString)
 
-	for {
-		if err := db.Ping(); err != nil {
-			slog.Info(fmt.Sprintf("Failed to connect, retrying... [%d/5]", retryCounter))
+		if err != nil {
+			slog.Warn(fmt.Sprintf("Failed to connect to Postgres DB, retrying...[%d/5]", i))
 
-			if retryCounter >= 5 {
-				slog.Error("Exiting...")
-				return nil, fmt.Errorf("error failed connection")
-			}
-
-			retryCounter++
-			backOff *= 2
-
-			time.Sleep(time.Second * time.Duration(backOff))
-		} else {
-			slog.Info("Successfully connected to Postgres DB")
-			break
+			backOff := i * 2
+			time.Sleep(time.Duration(backOff) * time.Second)
+			continue
 		}
+
+		slog.Info("Successfully connected to Postgres DB")
+		return conn, err
 	}
 
-	return db, nil
+	slog.Error("Failed to connect to Postgres DB")
+	return nil, fmt.Errorf("failed to connect to postgres db, exiting")
 }

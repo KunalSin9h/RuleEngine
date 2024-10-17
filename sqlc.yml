@@ -1,0 +1,11 @@
+version: "2"
+
+sql:
+  - engine: "postgresql"
+    queries: "query.sql"
+    schema: "schema.sql"
+    gen:
+      go:
+        package: "kunalsin9h"
+        out: "ruleengine"
+        sql_package: "pgx/v5"
