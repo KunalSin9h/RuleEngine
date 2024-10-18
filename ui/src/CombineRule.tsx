@@ -125,6 +125,7 @@ export default function CombineRule() {
           <div className="flex flex-col gap-4 bg-white rounded-lg shadow-lg p-6 w-2/3">
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold mb-1">Combined Rule</h2>
+                <p className="text-sm font-bold text-green-400">Added: {name}</p>
             </div>
             <div className="mb-4">
               <div className="w-full">
