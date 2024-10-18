@@ -81,9 +81,9 @@ export default function TestRule() {
                   )}
                 </p>
             </div>
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-2 gap-4 mb-8">
               <div className="w-full">
-                <pre className="bg-black text-white p-4 rounded-md  overflow-y-auto">{selectedRule?.Rule?.split('; ').map((rule, index) => <p key={index}>{rule}</p>)}</pre>
+                <pre className="bg-black text-white p-4 rounded-md  overflow-y-auto h-[100%]">{selectedRule?.Rule?.split('; ').map((rule, index) => <p key={index}>{rule}</p>)}</pre>
               </div>
               <div>
                 <textarea
@@ -91,7 +91,6 @@ export default function TestRule() {
                   onChange={(e) => setUser(e.target.value)}
                   className="bg-gray-700 text-white px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none w-full"
                   placeholder="Enter user data"
-                  style={{ height: '80%' }}
                 />
                 <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
 
