@@ -14,7 +14,6 @@ func TestParser_Parse_Example1(t *testing.T) {
 
 	if err != nil {
 		t.Error(err.Error())
-		t.Fail()
 	}
 }
 

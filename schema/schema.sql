@@ -10,3 +10,8 @@ CREATE TABLE IF NOT EXISTS rules (
 );
 
 --- Sample Data
+/*INSERT INTO rules (
+    name, description, rule, ast
+) VALUES (
+    "", "", "", ""
+)*/;
