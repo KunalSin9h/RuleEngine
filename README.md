@@ -128,7 +128,7 @@ make test
 
 #### DB Schema and Queries
 
-Database schema and sample data is in [schema/schema.sql](schema/schema.sql).
+Database schema is in [schema/schema.sql](schema/schema.sql).
 
 All the SQL queries used are in [schema/query.sql](schema/query.sql). I have used `sqlc` in golang as ORM.
 
