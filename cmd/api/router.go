@@ -11,6 +11,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"strings"
 )
 
 func (c *Config) setupRouter() {
@@ -24,7 +25,7 @@ func (c *Config) setupRouter() {
 	router.HandleFunc("POST /rule", enableCORS(c.createRule))
 
 	// COMBINE RULES
-	router.HandleFunc("POST /rules", func(w http.ResponseWriter, r *http.Request) {})
+	router.HandleFunc("POST /rules", enableCORS(c.combineRules))
 
 	// EVALUATE RULE
 	router.HandleFunc("POST /rule/eval", enableCORS(c.evalRule))
@@ -177,6 +178,61 @@ func (c *Config) evalRule(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Fprintln(w, string(responseData))
+}
+
+type CombineRulesPayload struct {
+	Rules       []string `json:"rules"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+}
+
+func (c *Config) combineRules(w http.ResponseWriter, r *http.Request) {
+	// Ready request body
+	data, err := io.ReadAll(r.Body)
+	if err != nil {
+		sendError(&w, err)
+		return
+	}
+
+	var payload CombineRulesPayload
+	err = json.Unmarshal(data, &payload)
+	if err != nil {
+		sendError(&w, err, http.StatusInternalServerError)
+		return
+	}
+
+	astNode, err := parser.CombineRules(payload.Rules)
+	if err != nil {
+		slog.Error("Failed to parse")
+		sendError(&w, err, http.StatusInternalServerError)
+		return
+	}
+
+	// convert astNode into JSON
+	astJson, err := json.MarshalIndent(astNode, "", "\t")
+	if err != nil {
+		slog.Error("Failed to marshal")
+		sendError(&w, err, http.StatusInternalServerError)
+		return
+	}
+
+	// we have successfully parsed, not add them to database
+	query := db.New(c.db)
+	err = query.CreateRule(context.Background(), db.CreateRuleParams{
+		Name:        payload.Name,
+		Description: pgtype.Text{String: payload.Description, Valid: true},
+		Ast:         astJson,
+		Rule:        strings.Join(payload.Rules, "; "),
+	})
+
+	if err != nil {
+		sendError(&w, err, http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintln(w, string(astJson))
 }
 
 func enableCORS(next http.HandlerFunc) http.HandlerFunc {
