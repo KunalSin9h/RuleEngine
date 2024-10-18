@@ -42,7 +42,7 @@ export default function TestRule() {
       <h1 className="text-white font-bold">All Rules</h1>
       {fetchError && <p className="text-red-500">Error fetching rules. Please try again later.</p>}
       <ul className="flex flex-col gap-4">
-        {rules.map((rule, index) => (
+        {rules && rules.map((rule, index) => (
           <button 
             key={index} 
             className="bg-gray-700 text-white px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer hover:bg-gray-600 flex flex-col"
@@ -51,12 +51,9 @@ export default function TestRule() {
               setShowModal(true);
             }}
           >
-            {/*  @ts-ignore*/}
-            <span className="font-semibold">{rule.Name}</span>
-            {/*  @ts-ignore*/}
-            <span className="text-xs text-gray-400">{rule.Description}</span>
           </button>
         ))}
+        {!rules && <p className="text-white font-mono mt-4">No Rules</p>}
       </ul>
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
