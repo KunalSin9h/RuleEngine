@@ -89,9 +89,9 @@ Go to [http://localhost:5000](http://localhost:5000)
 |----------|-------------------------------------------------|----------------------------|
 | PORT     | 5000                                            | application port           |
 | HOST     | "0.0.0.0"                                       | application host           |
-| POSTGRES | "postgresql://admin:admin@localhost:5432/rules" | postgres connection string |
+| POSTGRES | "postgresql://admin:admin@localhost:5432/ruleengine" | postgres connection string |
 
-Here, **we use** `rules` database, so make sure your postgres instance has this.
+Here, **we use** `ruleengine` database, so make sure your postgres instance has this.
 
 ## Stack
 

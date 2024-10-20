@@ -55,8 +55,7 @@ func CombineRules(ruleStrings []string) (*ast.Node, error) {
 		}
 	}
 
-	// Optimize AST to remove redundant checks.
-	return ast.Optimize(combineRoot), nil
+	return combineRoot, nil
 }
 
 // Parse creates AST Node with rule string
